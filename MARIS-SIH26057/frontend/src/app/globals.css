@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Grounded Maritime Palette: Deep Oceanic Slate, Bone, Muted Signal Pigments */
+  --bg-deep: #070a0f;
+  --bg-surface: #0b1018;
+  --bg-surface-raised: #101622;
+  --bg-subtle: #161e2e;
+
+  /* Typography & Structure */
+  --text-primary: #e2e8e4;
+  --text-secondary: #8c978f;
+  --text-dim: #4d5750;
+
+  /* Hairlines & Rules */
+  --rule-hairline: rgba(226, 232, 228, 0.08);
+  --rule-active: rgba(226, 232, 228, 0.18);
+  --rule-strong: rgba(226, 232, 228, 0.35);
+
+  /* Grounded Signal Pigments (Non-Neon, Marine Calibrated) */
+  --signal-vermilion: #d93829;
+  --signal-amber: #d99b26;
+  --signal-sage: #5b937c;
+  --signal-marine: #3b7b99;
+
+  /* Legacy component token aliases */
+  --color-border: rgba(226, 232, 228, 0.08);
+  --color-border-subtle: rgba(226, 232, 228, 0.05);
+  --color-primary: #3b7b99;
+  --color-text-muted: #4d5750;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Editorial Serif */
+.font-editorial {
+  font-family: 'Newsreader', Georgia, serif;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+/* High-Precision Instrument Monospace */
+.font-mono-inst {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-feature-settings: "zero" 1, "tnum" 1;
+}
+
+/* Tabular Numerals */
+.tabular-nums {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* Architectural Hairline Frame */
+.hairline-frame {
+  border: 1px solid var(--rule-hairline);
+  background-color: var(--bg-surface);
+}
+
+/* Nautical Coordinate Graticule */
+.nautical-graticule {
+  background-image: 
+    linear-gradient(to right, rgba(226, 232, 228, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 228, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Clean, Fast Scrollbar */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(226, 232, 228, 0.15);
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 232, 228, 0.35);
+}
+
+/* Pulse Skeleton Loader for Asynchronous Telemetry */
+@keyframes skeleton-shimmer {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
+}
+
+.skeleton-box {
+  animation: skeleton-shimmer 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: var(--bg-surface-raised);
+}

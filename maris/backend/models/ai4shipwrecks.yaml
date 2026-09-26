@@ -1,0 +1,33 @@
+# ============================================================
+# MARIS – AI4Shipwrecks Dataset Config
+# ============================================================
+# Place your AI4Shipwrecks dataset (or custom labelled sonar
+# data) under this structure, then update 'path' below.
+#
+# Expected directory structure:
+#   datasets/
+#     ai4shipwrecks/
+#       images/
+#         train/
+#         val/
+#         test/
+#       labels/
+#         train/
+#         val/
+#         test/
+# ============================================================
+
+path: ../datasets/ai4shipwrecks  # dataset root dir
+train: images/train
+val: images/val
+test: images/test
+
+# Class names (must match anomalies.class_name CHECK constraint)
+names:
+  0: ghost_net
+  1: wreck_debris
+  2: uxo
+  3: pipeline
+  4: geological
+  5: biological
+  6: unknown

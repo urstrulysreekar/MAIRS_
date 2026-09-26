@@ -1,0 +1,81 @@
+# ============================================================
+# MARIS – YOLOv8n Custom Configuration
+# Marine Anomaly Recognition and Intelligence System
+# ============================================================
+#
+# Based on YOLOv8n (nano) optimised for side-scan sonar imagery.
+#
+# MODIFICATIONS FROM STOCK YOLOv8n:
+#
+# 1. CLASSES: 7 marine hazard classes (see 'nc' below).
+#
+# 2. INPUT CHANNELS: Changed from 3 (RGB) to 5 channels:
+#    - ch0: Grayscale sonar intensity
+#    - ch1: GLCM Contrast
+#    - ch2: GLCM Homogeneity
+#    - ch3: GLCM Energy
+#    - ch4: GLCM Correlation
+#    This is set by modifying the first Conv layer's input channels.
+#
+# 3. DYSAMPLE UPSAMPLING (apply manually – see detector.py docs):
+#    Replace nn.Upsample in the neck with DySample modules.
+#    The YAML below uses standard Upsample; swap at code level.
+#
+# TRAINING COMMAND (Fish shell):
+#   yolo detect train \
+#     data=datasets/ai4shipwrecks.yaml \
+#     model=models/yolov8n-maris.yaml \
+#     epochs=300 \
+#     imgsz=640 \
+#     batch=16 \
+#     device=0 \
+#     project=runs/maris \
+#     name=v1
+#
+# ONNX EXPORT (Fish shell):
+#   yolo export model=runs/maris/v1/weights/best.pt \
+#     format=onnx opset=17 simplify=true imgsz=640
+# ============================================================
+
+# Parameters
+nc: 7  # number of classes
+scales:
+  n: [0.33, 0.25, 1024]  # depth_multiple, width_multiple, max_channels
+
+# ── Backbone ──────────────────────────────────────────────────
+# NOTE: First Conv uses ch0=5 to accept 5-channel input
+#       (grayscale + 4 GLCM texture maps)
+backbone:
+  - [-1, 1, Conv, [64, 3, 2]]    # 0-P1/2  — INPUT: 5ch if using GLCM
+  - [-1, 1, Conv, [128, 3, 2]]   # 1-P2/4
+  - [-1, 3, C2f, [128, True]]    # 2
+  - [-1, 1, Conv, [256, 3, 2]]   # 3-P3/8
+  - [-1, 6, C2f, [256, True]]    # 4
+  - [-1, 1, Conv, [512, 3, 2]]   # 5-P4/16
+  - [-1, 6, C2f, [512, True]]    # 6
+  - [-1, 1, Conv, [1024, 3, 2]]  # 7-P5/32
+  - [-1, 3, C2f, [1024, True]]   # 8
+  - [-1, 1, SPPF, [1024, 5]]     # 9
+
+# ── Head (FPN + PAN neck) ─────────────────────────────────────
+# NOTE on DySample: Replace each nn.Upsample below with:
+#   DySample(in_ch, scale=2, style='lp', groups=4)
+# in ultralytics/nn/modules/block.py for better small-target retention.
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]  # 10  ← swap to DySample
+  - [[-1, 6], 1, Concat, [1]]                     # 11 cat backbone P4
+  - [-1, 3, C2f, [512]]                           # 12
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]    # 13  ← swap to DySample
+  - [[-1, 4], 1, Concat, [1]]                     # 14 cat backbone P3
+  - [-1, 3, C2f, [256]]                           # 15 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]]                    # 16
+  - [[-1, 12], 1, Concat, [1]]                    # 17 cat head P4
+  - [-1, 3, C2f, [512]]                           # 18 (P4/16-medium)
+
+  - [-1, 1, Conv, [512, 3, 2]]                    # 19
+  - [[-1, 9], 1, Concat, [1]]                     # 20 cat head P5
+  - [-1, 3, C2f, [1024]]                          # 21 (P5/32-large)
+
+  - [[15, 18, 21], 1, Detect, [nc]]               # 22 Detect(P3, P4, P5)
