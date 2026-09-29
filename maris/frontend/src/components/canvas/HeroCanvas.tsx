@@ -53,7 +53,9 @@ function VibrantEarthPlanet() {
           float dotNV = dot(viewDir, vNormal);
           // Extreme feathering with power 4.8: zero hard outline, seamless gradient falloff
           float fresnel = pow(1.0 - clamp(dotNV, 0.0, 1.0), 4.8);
-          gl_FragColor = vec4(uColor, fresnel * 0.55 * uOpacity);
+          // Atmosphere only illuminates along the sunlit right limb
+          float sunAlignment = clamp(vNormal.x * 2.0 + 0.1, 0.0, 1.0);
+          gl_FragColor = vec4(uColor, fresnel * sunAlignment * 0.7 * uOpacity);
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -112,11 +114,11 @@ function VibrantEarthPlanet() {
           ref={planetMatRef}
           map={textures.map}
           normalMap={textures.normalMap}
-          normalScale={new THREE.Vector2(2.2, 2.2)}
+          normalScale={new THREE.Vector2(2.8, 2.8)} // Enhanced relief pop along terminator line
           roughnessMap={textures.specularMap}
           metalnessMap={textures.specularMap}
-          roughness={0.4} // Oceans glint specularly while land remains matte
-          metalness={0.2}
+          roughness={0.38} // Oceans glint specularly while land remains matte
+          metalness={0.22}
           clearcoat={0.35}
           clearcoatRoughness={0.2}
           transparent={true}
@@ -124,7 +126,7 @@ function VibrantEarthPlanet() {
         />
       </mesh>
 
-      {/* ── 2. Subtle Soft Atmospheric Halo (Extreme Feathering / No Hard Rings) ── */}
+      {/* ── 2. Subtle Soft Atmospheric Halo along illuminated right limb ── */}
       <mesh scale={1.018}>
         <sphereGeometry args={[2.4, 64, 64]} />
         <primitive object={atmosphereMaterial} attach="material" />
@@ -155,13 +157,13 @@ export default function HeroCanvas() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Rich navy blue ambient light giving shadowed hemisphere deep color & depth */}
-          <ambientLight intensity={0.8} color="#1e1b4b" />
+          {/* Deep dark navy ambient light so shadow hemisphere falls into heavy realistic darkness */}
+          <ambientLight intensity={0.03} color="#0c1322" />
 
-          {/* Warm Sunlight DirectionalLight creating natural contrast and oceanic reflections */}
+          {/* Stark warm Sunlight positioned directly to the right creating half-dark phase */}
           <directionalLight
-            position={[6.5, 2.8, 3.8]}
-            intensity={5.5}
+            position={[11, 0.8, 1.8]}
+            intensity={12}
             color="#fdf4dc"
           />
 
