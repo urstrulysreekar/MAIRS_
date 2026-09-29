@@ -94,7 +94,7 @@ export default function Hero() {
         {['M', 'A', 'R', 'I', 'S'].map((char) => (
           <span
             key={char}
-            className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[13.5rem] font-black uppercase tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-500"
+            className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[13.5rem] font-black uppercase tracking-tighter leading-none text-white drop-shadow-2xl"
             style={{
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}

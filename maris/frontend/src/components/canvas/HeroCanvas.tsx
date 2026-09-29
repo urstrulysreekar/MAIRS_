@@ -1,22 +1,22 @@
 'use client';
 
-import React, { useRef, Suspense } from 'react';
+import React, { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
-// ── High-Resolution Grayscale Lunar & Volcanic Rock Texture Maps ──
+// ── Vibrant Daytime Earth / Oceanic Exoplanet Textures ──
 const TEXTURE_URLS = {
-  // Grayscale lunar surface map for realistic craters and ridges
-  map: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/moon_1024.jpg',
-  // Extreme elevation terrain normal map
+  // Rich deep-sea blues, lush green continents & dynamic white cloud cover
+  map: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_atmos_2048.jpg',
+  // High-resolution terrain elevation normal map
   normalMap: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_normal_2048.jpg',
-  // Tactile surface roughness map
-  roughnessMap: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/moon_1024.jpg',
+  // Specular map: reflective oceans, matte landmasses
+  specularMap: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_specular_2048.jpg',
 };
 
-// ── Ultra-Premium Obsidian Lunar Planet (Physical Material & Stark Eclipse Lighting) ──
-function ObsidianEclipsePlanet() {
+// ── Realistic Vibrant Oceanic Celestial Body ──
+function VibrantEarthPlanet() {
   const groupRef = useRef<THREE.Group>(null);
   const planetMeshRef = useRef<THREE.Mesh>(null);
   const planetMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
@@ -24,8 +24,44 @@ function ObsidianEclipsePlanet() {
   const currentOpacity = useRef(1);
   const currentY = useRef(0);
 
-  // Load high-resolution grayscale textures
+  // Load high-resolution natural textures
   const textures = useTexture(TEXTURE_URLS);
+
+  // Soft atmospheric halo with extreme feathering (high Fresnel exponent) - NO HARD BORDER
+  const atmosphereMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uOpacity: { value: 1.0 },
+        uColor: { value: new THREE.Color('#38bdf8') }, // Soft azure atmospheric tint
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uOpacity;
+        uniform vec3 uColor;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vec3 viewDir = normalize(-vPosition);
+          float dotNV = dot(viewDir, vNormal);
+          // Extreme feathering with power 4.8: zero hard outline, seamless gradient falloff
+          float fresnel = pow(1.0 - clamp(dotNV, 0.0, 1.0), 4.8);
+          gl_FragColor = vec4(uColor, fresnel * 0.55 * uOpacity);
+        }
+      `,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.FrontSide,
+    });
+  }, []);
 
   useFrame((state, delta) => {
     if (!groupRef.current || !planetMatRef.current) return;
@@ -43,11 +79,14 @@ function ObsidianEclipsePlanet() {
       Math.min(delta * 4.5, 1)
     );
 
-    // Apply interpolated opacity to physical material
+    // Apply synchronized opacity
     planetMatRef.current.opacity = currentOpacity.current;
+    if (atmosphereMaterial.uniforms.uOpacity) {
+      atmosphereMaterial.uniforms.uOpacity.value = currentOpacity.current;
+    }
     groupRef.current.visible = currentOpacity.current > 0.001;
 
-    // ── Scroll Parallax (Y-Axis shift) ──
+    // ── Scroll Parallax (Y-Axis) ──
     const targetY = scrollY * 0.0008;
     currentY.current = THREE.MathUtils.lerp(
       currentY.current,
@@ -59,30 +98,36 @@ function ObsidianEclipsePlanet() {
     // ── Slow Planetary Axial Rotation ──
     if (planetMeshRef.current) {
       planetMeshRef.current.rotation.y += delta * 0.038;
-      planetMeshRef.current.rotation.x = 0.16; // Subtle natural axial tilt
+      planetMeshRef.current.rotation.x = 0.16; // Natural axial tilt
       planetMeshRef.current.rotation.z = -0.06;
     }
   });
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Solid, sharp planet body grounded physically in space without external halos */}
+      {/* ── 1. Main Vibrant Earth Body with MeshPhysicalMaterial ── */}
       <mesh ref={planetMeshRef}>
         <sphereGeometry args={[2.4, 64, 64]} />
         <meshPhysicalMaterial
           ref={planetMatRef}
           map={textures.map}
           normalMap={textures.normalMap}
-          roughnessMap={textures.roughnessMap}
-          normalScale={new THREE.Vector2(3.5, 3.5)} // Raking ridges & deep crater relief
-          color="#0a0a0f" // Deep, rich obsidian slate base
-          roughness={0.85} // Absorptive volcanic rock texture
-          metalness={0.08} // Non-metallic mineral ground
-          clearcoat={0.1} // Subtle premium sheen
-          clearcoatRoughness={0.25}
+          normalScale={new THREE.Vector2(2.2, 2.2)}
+          roughnessMap={textures.specularMap}
+          metalnessMap={textures.specularMap}
+          roughness={0.4} // Oceans glint specularly while land remains matte
+          metalness={0.2}
+          clearcoat={0.35}
+          clearcoatRoughness={0.2}
           transparent={true}
           opacity={1}
         />
+      </mesh>
+
+      {/* ── 2. Subtle Soft Atmospheric Halo (Extreme Feathering / No Hard Rings) ── */}
+      <mesh scale={1.018}>
+        <sphereGeometry args={[2.4, 64, 64]} />
+        <primitive object={atmosphereMaterial} attach="material" />
       </mesh>
     </group>
   );
@@ -110,18 +155,18 @@ export default function HeroCanvas() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Barely visible ambient light so dark hemisphere isn't pitch black */}
-          <ambientLight intensity={0.05} color="#ffffff" />
+          {/* Rich navy blue ambient light giving shadowed hemisphere deep color & depth */}
+          <ambientLight intensity={0.8} color="#1e1b4b" />
 
-          {/* High-intensity pure white DirectionalLight at extreme back-angle creating stark eclipse crescent */}
+          {/* Warm Sunlight DirectionalLight creating natural contrast and oceanic reflections */}
           <directionalLight
-            position={[12, 2, -10]}
-            intensity={18}
-            color="#ffffff"
+            position={[6.5, 2.8, 3.8]}
+            intensity={5.5}
+            color="#fdf4dc"
           />
 
-          {/* Physically grounded Obsidian planet body */}
-          <ObsidianEclipsePlanet />
+          {/* Realistic Vibrant Earth */}
+          <VibrantEarthPlanet />
         </Suspense>
       </Canvas>
     </div>
