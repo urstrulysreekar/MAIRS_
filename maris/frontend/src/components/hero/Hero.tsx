@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import TopographicBackground from '@/components/hero/TopographicBackground';
 
 // Dynamically import 3D WebGL Planet with SSR disabled
 const HeroCanvas = dynamic(() => import('@/components/canvas/HeroCanvas'), {
@@ -86,22 +87,27 @@ export default function Hero() {
         </div>
       </nav>
 
-      {/* ── 2. Interactive 3D WebGL Eclipse Planet (Mounted via HeroCanvas at z-index: -1, pointer-events: none) ── */}
-      <HeroCanvas />
+      {/* ── 2. Tactical Topographic & Network Nodes SVG Background (Behind 3D Canvas) ── */}
+      <TopographicBackground />
 
       {/* Atmospheric space haze behind WebGL planet */}
       <div className="absolute inset-0 pointer-events-none -z-20 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55rem] h-[55rem] rounded-full bg-blue-900/15 blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] rounded-full bg-cyan-900/10 blur-[150px] pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 w-[45rem] h-[45rem] rounded-full bg-purple-900/15 blur-[160px] pointer-events-none" />
       </div>
 
-      {/* ── 3. Main Hero Typography: MARIS spaced extremely far across full width ── */}
+      {/* ── 3. Interactive 3D WebGL Earth at Night (Mounted via HeroCanvas at z-index: -1) ── */}
+      <HeroCanvas />
+
+      {/* ── 4. Main Hero Typography: MARIS spaced extremely far across full width with Neon Glassmorphic Glow ── */}
       <div className="relative z-20 w-full flex justify-between items-center px-8 sm:px-14 md:px-20 lg:px-24 select-none pointer-events-none">
         {['M', 'A', 'R', 'I', 'S'].map((char) => (
           <span
             key={char}
-            className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[13.5rem] font-black text-white uppercase tracking-tighter leading-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)]"
+            className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[13.5rem] font-black uppercase tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-cyan-600 drop-shadow-[0_0_25px_rgba(168,85,247,0.8)] drop-shadow-[0_0_50px_rgba(6,182,212,0.6)] filter"
             style={{
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              WebkitTextStroke: '2px white',
             }}
           >
             {char}
@@ -109,18 +115,18 @@ export default function Hero() {
         ))}
       </div>
 
-      {/* ── 4. Bottom Hero Content ── */}
+      {/* ── 5. Bottom Hero Content ── */}
       <div className="absolute bottom-12 w-full flex flex-col items-center justify-center gap-6 z-20 pointer-events-auto">
         {/* Subheading: 'THAT SIMPLY WORKS' (white, medium tracking, uppercase) */}
         <p className="font-mono text-xs sm:text-sm font-semibold tracking-[0.25em] text-white uppercase select-none">
           THAT SIMPLY WORKS
         </p>
 
-        {/* CTA Button: Fully rounded pill shape (rounded-full), solid white background, black text reading 'Launch Demo Mode', with ample horizontal padding */}
+        {/* CTA Button: Solid white background, dark text, and strong mixed-color cyan & purple glowing aura */}
         <button
           type="button"
           onClick={() => router.push('/console')}
-          className="px-9 py-3.5 sm:px-11 sm:py-4 rounded-full bg-white text-black font-semibold text-sm sm:text-base tracking-wide hover:bg-neutral-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.55)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          className="px-9 py-3.5 sm:px-11 sm:py-4 rounded-full bg-white text-black font-semibold text-sm sm:text-base tracking-wide hover:bg-neutral-100 transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.5),0_0_50px_rgba(168,85,247,0.4)] hover:shadow-[0_0_45px_rgba(6,182,212,0.7),0_0_70px_rgba(168,85,247,0.6)] hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
         >
           Launch Demo Mode
         </button>
