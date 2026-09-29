@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemoStore, useFilteredAnomalies, useKPIMetrics, demoStore } from '@/lib/demo';
 import { Anomaly, HazardClass } from '@/lib/demo/types';

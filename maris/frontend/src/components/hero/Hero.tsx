@@ -98,7 +98,8 @@ export default function Hero() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-screen bg-[#070a0f] overflow-hidden select-none border-b border-white/[0.08]"
+      className="relative w-full h-screen bg-transparent overflow-hidden select-none border-b border-white/[0.08]"
+      style={{ isolation: 'isolate' }}
     >
       {/* ── 1. Top Architectural Header Bar (Fixed & Seamless) ── */}
       <header
@@ -145,7 +146,8 @@ export default function Hero() {
         </div>
       </header>
 
-      {/* ── 2. Solid Dark Matte 3D Sphere Canvas removed ── */}
+      {/* ── 2. Photorealistic 3D Planet Element (Fixed & isolated at z-index: -1 behind typography) ── */}
+      <HeroCanvas />
 
       {/* ── 3. Subtle Cyber Background Radial Ambient Lighting ── */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_40%,_#070a0f_95%)] z-0" />
