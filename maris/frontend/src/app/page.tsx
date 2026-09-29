@@ -45,7 +45,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#050515] text-[#e2e8e4] selection:bg-[#3b7b99] selection:text-white overflow-hidden">
+    <main className="min-h-screen bg-[#030305] text-[#e2e8e4] selection:bg-[#3b7b99] selection:text-white overflow-hidden">
       {/* ── 1. Hero Section matching reference aesthetic ── */}
       <Hero />
 
