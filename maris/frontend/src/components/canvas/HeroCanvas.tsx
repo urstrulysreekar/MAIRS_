@@ -49,25 +49,5 @@ function MatteDarkSphere() {
 }
 
 export default function HeroCanvas() {
-  return (
-    <div className="absolute inset-0 pointer-events-none z-10 h-full w-full">
-      <Canvas
-        camera={{ position: [0, 0, 5.2], fov: 45 }}
-        dpr={[1, 2]}
-        gl={{
-          antialias: true,
-          alpha: true,
-          powerPreference: 'high-performance',
-        }}
-      >
-        {/* Soft natural illumination */}
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[4, 5, 4]} intensity={0.7} color="#94a3b8" />
-        <directionalLight position={[-4, -3, 2]} intensity={0.25} color="#1e293b" />
-
-        {/* 3D Solid Matte Dark Sphere */}
-        <MatteDarkSphere />
-      </Canvas>
-    </div>
-  );
+  return null;
 }

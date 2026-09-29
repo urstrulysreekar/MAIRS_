@@ -145,8 +145,7 @@ export default function Hero() {
         </div>
       </header>
 
-      {/* ── 2. Solid Dark Matte 3D Sphere Canvas (No Rim Glow / No Corona) ── */}
-      <HeroCanvas />
+      {/* ── 2. Solid Dark Matte 3D Sphere Canvas removed ── */}
 
       {/* ── 3. Subtle Cyber Background Radial Ambient Lighting ── */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_40%,_#070a0f_95%)] z-0" />
