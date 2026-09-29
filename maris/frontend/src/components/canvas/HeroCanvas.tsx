@@ -4,24 +4,25 @@ import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-// ── Interactive 3D WebGL Planet with 'Eclipse' Lighting & Scroll Mechanics ──
+// ── Interactive 3D WebGL Planet with 'Eclipse' Lighting & Reversed Scroll Fade ──
 function EclipsePlanet() {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
-  const currentOpacity = useRef(0);
+  const currentOpacity = useRef(1);
   const currentY = useRef(0);
 
   useFrame((state, delta) => {
     if (!meshRef.current || !materialRef.current) return;
 
-    // Read window scroll directly without adding scroll event listeners
+    // Read window scroll directly without native scroll event listeners
     const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
 
-    // ── Scroll Opacity Interpolation ──
-    // At scrollY === 0, opacity is 0. Smoothly fades in as the user scrolls down,
-    // and fades completely out to 0 when user scrolls back to the absolute top.
-    const fadeThreshold = 180;
-    const targetOpacity = THREE.MathUtils.clamp(scrollY / fadeThreshold, 0, 1);
+    // ── Reversed Scroll Opacity Interpolation ──
+    // Fully visible (opacity: 1) at the absolute top of the page (scrollY === 0).
+    // As the user scrolls down, smoothly decreases opacity to 0, causing the planet to vanish.
+    // When scrolling back up to the top, smoothly interpolates back in to full visibility (1).
+    const fadeDistance = 450;
+    const targetOpacity = THREE.MathUtils.clamp(1 - scrollY / fadeDistance, 0, 1);
     currentOpacity.current = THREE.MathUtils.lerp(
       currentOpacity.current,
       targetOpacity,
@@ -39,7 +40,7 @@ function EclipsePlanet() {
     );
     meshRef.current.position.y = currentY.current;
 
-    // ── Planetary Rotation ──
+    // ── Slow Planetary Axial Rotation ──
     meshRef.current.rotation.y += delta * 0.045;
     meshRef.current.rotation.x = 0.16; // Subtle axial tilt
     meshRef.current.rotation.z = -0.08;
@@ -56,7 +57,7 @@ function EclipsePlanet() {
         roughness={0.9}
         metalness={0.1}
         transparent={true}
-        opacity={0}
+        opacity={1}
       />
     </mesh>
   );
