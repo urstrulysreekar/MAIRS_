@@ -1,8 +1,15 @@
 'use client';
 
 import React, { useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+// Dynamically import 3D WebGL Planet with SSR disabled
+const HeroCanvas = dynamic(() => import('@/components/canvas/HeroCanvas'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function Hero() {
   const router = useRouter();
@@ -79,92 +86,12 @@ export default function Hero() {
         </div>
       </nav>
 
-      {/* ── 2. Background Glowing Eclipse Effect ── */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
-        {/* Layer 1: Extreme blur deep blue volumetric background halo */}
-        <div className="absolute w-[55rem] h-[55rem] rounded-full bg-blue-900/35 blur-[140px] pointer-events-none" />
+      {/* ── 2. Interactive 3D WebGL Eclipse Planet (Mounted via HeroCanvas at z-index: -1, pointer-events: none) ── */}
+      <HeroCanvas />
 
-        {/* Layer 2: Electric cyan / royal blue core inner glow */}
-        <div className="absolute w-[38rem] h-[38rem] rounded-full bg-cyan-500/15 blur-[95px] pointer-events-none" />
-        <div className="absolute w-[24rem] h-[24rem] rounded-full bg-blue-600/25 blur-[65px] pointer-events-none" />
-
-        {/* Layer 3: Central Celestial Eclipse Disc with Asymmetrical Glowing Ring */}
-        <div className="relative w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] md:w-[600px] md:h-[600px] lg:w-[680px] lg:h-[680px] flex items-center justify-center">
-          {/* Asymmetrical Glowing SVG Crescent Arc with Multi-Tier Filters */}
-          <svg
-            className="absolute inset-0 w-full h-full -rotate-12 scale-105"
-            viewBox="0 0 500 500"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              {/* Luminous Crescent Gradient: Pure white apex -> Electric Cyan -> Deep Cobalt -> Transparent */}
-              <linearGradient id="eclipseGlowGradient" x1="10%" y1="0%" x2="90%" y2="100%">
-                <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-                <stop offset="22%" stopColor="#bae6fd" stopOpacity="0.95" />
-                <stop offset="48%" stopColor="#38bdf8" stopOpacity="0.75" />
-                <stop offset="72%" stopColor="#1d4ed8" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#050515" stopOpacity="0" />
-              </linearGradient>
-
-              {/* Multi-tier Glow Filter */}
-              <filter id="crescentBloomFilter" x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="sharpGlow" />
-                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="midGlow" />
-                <feGaussianBlur in="SourceGraphic" stdDeviation="28" result="wideGlow" />
-                <feMerge>
-                  <feMergeNode in="wideGlow" />
-                  <feMergeNode in="midGlow" />
-                  <feMergeNode in="sharpGlow" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {/* Diffuse Outer Ambient Corona */}
-            <circle
-              cx="250"
-              cy="250"
-              r="230"
-              stroke="url(#eclipseGlowGradient)"
-              strokeWidth="4"
-              strokeDasharray="940 500"
-              strokeDashoffset="180"
-              opacity="0.5"
-              filter="blur(18px)"
-            />
-
-            {/* Mid-Core Glowing Crescent */}
-            <circle
-              cx="250"
-              cy="250"
-              r="228"
-              stroke="url(#eclipseGlowGradient)"
-              strokeWidth="5"
-              strokeDasharray="800 650"
-              strokeDashoffset="210"
-              filter="url(#crescentBloomFilter)"
-            />
-
-            {/* Razor-Sharp White/Blue Crescent Edge */}
-            <circle
-              cx="250"
-              cy="250"
-              r="226"
-              stroke="#ffffff"
-              strokeWidth="2.5"
-              strokeDasharray="440 1000"
-              strokeDashoffset="240"
-              opacity="0.98"
-              style={{
-                filter: 'drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 18px #38bdf8)',
-              }}
-            />
-          </svg>
-
-          {/* Eclipsing Dark Disc blending into the midnight blue/black background */}
-          <div className="w-[94%] h-[94%] rounded-full bg-[#050515] shadow-[inset_0_0_60px_rgba(10,25,50,0.85)] relative z-0" />
-        </div>
+      {/* Atmospheric space haze behind WebGL planet */}
+      <div className="absolute inset-0 pointer-events-none -z-20 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55rem] h-[55rem] rounded-full bg-blue-900/15 blur-[140px] pointer-events-none" />
       </div>
 
       {/* ── 3. Main Hero Typography: MARIS spaced extremely far across full width ── */}
