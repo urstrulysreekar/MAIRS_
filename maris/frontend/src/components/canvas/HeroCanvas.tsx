@@ -12,12 +12,11 @@ const TEXTURE_URLS = {
   roughnessMap: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_specular_2048.jpg',
 };
 
-// ── Interactive 3D WebGL Planet with High-Detail Textures & Atmospheric Halo ──
+// ── Interactive 3D WebGL Planet with High-Detail Textures & Cinematic Lighting ──
 function TexturedEclipsePlanet() {
   const groupRef = useRef<THREE.Group>(null);
   const planetMeshRef = useRef<THREE.Mesh>(null);
   const planetMatRef = useRef<THREE.MeshStandardMaterial>(null);
-  const atmosphereMatRef = useRef<THREE.MeshBasicMaterial>(null);
 
   const currentOpacity = useRef(1);
   const currentY = useRef(0);
@@ -26,15 +25,14 @@ function TexturedEclipsePlanet() {
   const textures = useTexture(TEXTURE_URLS);
 
   useFrame((state, delta) => {
-    if (!groupRef.current || !planetMatRef.current || !atmosphereMatRef.current) return;
+    if (!groupRef.current || !planetMatRef.current) return;
 
     // Read window scroll directly without native scroll event listeners
     const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
 
     // ── Reversed Scroll Opacity Interpolation ──
     // Fully visible (1) at the absolute top (scrollY === 0).
-    // As user scrolls down, opacity smoothly decreases to 0, causing planet and atmosphere to vanish.
-    // When scrolling back up to the top, smoothly fades back to full visibility.
+    // Smoothly decreases to 0 as user scrolls down, fading back in at the top.
     const fadeDistance = 450;
     const targetOpacity = THREE.MathUtils.clamp(1 - scrollY / fadeDistance, 0, 1);
     currentOpacity.current = THREE.MathUtils.lerp(
@@ -43,9 +41,8 @@ function TexturedEclipsePlanet() {
       Math.min(delta * 4.5, 1)
     );
 
-    // Apply interpolated opacity to planet and atmospheric halo
+    // Apply interpolated opacity to planet material
     planetMatRef.current.opacity = currentOpacity.current;
-    atmosphereMatRef.current.opacity = currentOpacity.current * 0.15; // Low atmospheric opacity
     groupRef.current.visible = currentOpacity.current > 0.001;
 
     // ── Scroll Parallax (Shifts slightly upward as user scrolls down) ──
@@ -67,7 +64,7 @@ function TexturedEclipsePlanet() {
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* ── 1. Main Planet Body with High-Detail Normal & Roughness Maps ── */}
+      {/* ── Main Planet Body with High-Detail Normal & Roughness Maps ── */}
       <mesh ref={planetMeshRef}>
         <sphereGeometry args={[2.4, 64, 64]} />
         <meshStandardMaterial
@@ -75,26 +72,12 @@ function TexturedEclipsePlanet() {
           map={textures.map}
           normalMap={textures.normalMap}
           roughnessMap={textures.roughnessMap}
-          normalScale={new THREE.Vector2(3.5, 3.5)} // High normal scale to highlight ridges under grazing light
-          color="#0a1220" // Dark moody tint preserving the deep-space aesthetic
-          roughness={0.88}
-          metalness={0.12}
+          normalScale={new THREE.Vector2(3.5, 3.5)}
+          color="#020208" // Deep near-black midnight blue base
+          roughness={0.8}  // High roughness to organically absorb light
+          metalness={0.1}  // Low metalness to prevent washed-out sheen
           transparent={true}
           opacity={1}
-        />
-      </mesh>
-
-      {/* ── 2. Atmospheric Glow Optical Halo (Scaled 1.035, BackSide + Additive) ── */}
-      <mesh scale={1.035}>
-        <sphereGeometry args={[2.4, 64, 64]} />
-        <meshBasicMaterial
-          ref={atmosphereMatRef}
-          color="#00f0ff"
-          transparent={true}
-          opacity={0.15}
-          blending={THREE.AdditiveBlending}
-          side={THREE.BackSide}
-          depthWrite={false}
         />
       </mesh>
     </group>
@@ -123,29 +106,22 @@ export default function HeroCanvas() {
         }}
       >
         <Suspense fallback={null}>
-          {/* Minimal ambient light keeping front hemisphere dark */}
-          <ambientLight intensity={0.02} />
+          {/* Subtle ambient light keeping front hemisphere deeply dark */}
+          <ambientLight intensity={0.01} />
 
-          {/* Dramatic DirectionalLight creating a harsh terminator line across normal maps */}
-          <directionalLight position={[5, 2.2, -4.5]} intensity={8.5} color="#ffffff" />
+          {/* High-contrast DirectionalLight positioned far side-back creating a sharp terminator line */}
+          <directionalLight position={[10, 0, -10]} intensity={14} color="#ffffff" />
 
-          {/* Icy blue & cyan PointLights catching the rim and highlighting surface ridges */}
+          {/* Electric cyan/blue PointLight grazing dark edge to catch surface relief */}
           <pointLight
-            position={[2.7, 1.8, -0.5]}
-            intensity={7.0}
-            color="#38bdf8"
-            distance={15}
-            decay={2}
-          />
-          <pointLight
-            position={[1.5, 2.5, -0.7]}
-            intensity={5.0}
+            position={[2.5, 1.0, -0.6]}
+            intensity={9.5}
             color="#00f0ff"
-            distance={11}
+            distance={14}
             decay={2}
           />
 
-          {/* Planet with atmosphere */}
+          {/* Planet */}
           <TexturedEclipsePlanet />
         </Suspense>
       </Canvas>
