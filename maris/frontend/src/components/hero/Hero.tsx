@@ -1,15 +1,8 @@
 'use client';
 
 import React, { useRef } from 'react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-// Dynamically import Three.js Hero Canvas with SSR disabled
-const HeroCanvas = dynamic(() => import('@/components/canvas/HeroCanvas'), {
-  ssr: false,
-  loading: () => null,
-});
 
 export default function Hero() {
   const router = useRouter();
@@ -173,9 +166,6 @@ export default function Hero() {
           <div className="w-[94%] h-[94%] rounded-full bg-[#050515] shadow-[inset_0_0_60px_rgba(10,25,50,0.85)] relative z-0" />
         </div>
       </div>
-
-      {/* ── 3D Photorealistic Planet Element (Behind typography at z-index: -1) ── */}
-      <HeroCanvas />
 
       {/* ── 3. Main Hero Typography: MARIS spaced extremely far across full width ── */}
       <div className="relative z-20 w-full flex justify-between items-center px-8 sm:px-14 md:px-20 lg:px-24 select-none pointer-events-none">
