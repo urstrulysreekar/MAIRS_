@@ -1,218 +1,217 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { scrollProgress } from '@/lib/scrollBridge';
 
-// Dynamically import Three.js Hero Canvas with SSR disabled to prevent hydration mismatches
+// Dynamically import Three.js Hero Canvas with SSR disabled
 const HeroCanvas = dynamic(() => import('@/components/canvas/HeroCanvas'), {
   ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 bg-[#070a0f] flex items-center justify-center pointer-events-none">
-      <div className="w-80 h-80 rounded-full bg-[#101622] animate-pulse blur-3xl" />
-    </div>
-  ),
+  loading: () => null,
 });
 
 export default function Hero() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
-  const heroContentRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const ctaBlockRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLElement>(null);
-  const [utcTimestamp, setUtcTimestamp] = useState<string>('');
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setUtcTimestamp(now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC');
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) {
-      scrollProgress.value = 0;
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      // Pin hero for ~180% scroll height with smooth scrubbing
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: '+=180%',
-          pin: true,
-          scrub: 1.2,
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            // Write directly to non-reactive singleton bridge
-            scrollProgress.value = self.progress;
-          },
-        },
-      });
-
-      // Monolith Title and CTA fade out, scale up slightly, and blur out
-      tl.to(
-        [titleRef.current, ctaBlockRef.current],
-        {
-          opacity: 0,
-          y: -90,
-          scale: 1.1,
-          filter: 'blur(12px)',
-          ease: 'power2.inOut',
-          duration: 0.65,
-        },
-        0
-      );
-
-      // Header dissolves cleanly as sphere scales past viewport
-      tl.to(
-        navRef.current,
-        {
-          opacity: 0,
-          y: -35,
-          filter: 'blur(6px)',
-          ease: 'power2.inOut',
-          duration: 0.45,
-        },
-        0.05
-      );
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
 
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-screen bg-transparent overflow-hidden select-none border-b border-white/[0.08]"
+      className="relative w-full h-screen min-h-screen overflow-hidden bg-[#050515] select-none flex items-center justify-center"
       style={{ isolation: 'isolate' }}
     >
-      {/* ── 1. Top Architectural Header Bar (Fixed & Seamless) ── */}
-      <header
-        ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 w-full border-b border-white/[0.08] bg-[#0b1018]/85 backdrop-blur-md px-4 sm:px-8 py-3 transition-opacity duration-300 pointer-events-auto"
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Brand Mark & Geodetic Tracker */}
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="h-5 w-5 border border-[#8c978f] flex items-center justify-center bg-[#101622]">
-                <div className="h-2 w-2 bg-[#e2e8e4]" />
-              </div>
-              <span className="font-mono-inst text-xs font-semibold tracking-[0.25em] text-[#e2e8e4] uppercase">
-                MARIS
-              </span>
-            </Link>
-            <div className="hidden sm:flex items-center gap-2 border-l border-white/[0.08] pl-4 font-mono-inst text-[11px] text-[#8c978f]">
-              <span>SIH26057</span>
-              <span>/</span>
-              <span>HYDROGRAPHIC INTEL</span>
-            </div>
-          </div>
+      {/* ── 1. Navbar (Top) ── */}
+      <nav className="flex justify-between items-center w-full px-8 py-6 absolute top-0 z-50 pointer-events-auto">
+        {/* Left: Pill-shaped translucent badge containing 'MARIS' */}
+        <Link
+          href="/"
+          className="px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.05] backdrop-blur-md hover:bg-white/[0.1] hover:border-white/20 transition-all flex items-center gap-2 group shadow-[0_0_15px_rgba(255,255,255,0.03)]"
+          aria-label="MARIS Home"
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+          <span className="font-mono text-xs font-bold tracking-[0.25em] text-white">
+            MARIS
+          </span>
+        </Link>
 
-          {/* Real-time System Telemetry & Console Launch Button */}
-          <div className="flex items-center gap-6 font-mono-inst text-[11px]">
-            <div className="hidden md:flex items-center gap-3 text-[#8c978f]">
-              <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 bg-[#5b937c]" />
-                <span>ACOUSTIC LINK: ACTIVE</span>
-              </span>
-              <span>|</span>
-              <span className="tabular-nums text-[#e2e8e4]">{utcTimestamp || '2026-09-26 00:00:00 UTC'}</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => router.push('/console')}
-              className="border border-white/20 bg-[#101622] px-3.5 py-1.5 font-mono-inst text-xs font-medium text-[#e2e8e4] transition-colors hover:border-white/50 hover:bg-[#161e2e]"
-            >
-              LAUNCH CONSOLE [C2]
-            </button>
-          </div>
+        {/* Center: Navigation links with small, subtle text matching application routes */}
+        <div className="hidden lg:flex items-center gap-8 font-mono text-xs text-white/50 tracking-wider">
+          <Link
+            href="/console"
+            className="hover:text-white transition-colors duration-200"
+          >
+            Operations Console
+          </Link>
+          <Link
+            href="/map"
+            className="hover:text-white transition-colors duration-200"
+          >
+            Swath Map
+          </Link>
+          <Link
+            href="/upload"
+            className="hover:text-white transition-colors duration-200"
+          >
+            Sonar Ingestion
+          </Link>
+          <Link
+            href="/anomalies"
+            className="hover:text-white transition-colors duration-200"
+          >
+            Target Inventory
+          </Link>
+          <Link
+            href="/reports"
+            className="hover:text-white transition-colors duration-200"
+          >
+            Executive Reports
+          </Link>
         </div>
-      </header>
 
-      {/* ── 2. Photorealistic 3D Planet Element (Fixed & isolated at z-index: -1 behind typography) ── */}
+        {/* Right: Placeholder pill buttons for language selection ('EN') and 'Log in' */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="px-3.5 py-1 rounded-full border border-white/10 bg-white/[0.03] text-xs font-mono text-white/60 hover:text-white hover:border-white/25 transition-all cursor-default"
+          >
+            EN
+          </button>
+          <Link
+            href="/login"
+            className="px-5 py-1.5 rounded-full border border-white/15 bg-white/[0.08] hover:bg-white/[0.16] hover:border-white/30 text-xs font-mono font-medium text-white transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+          >
+            Log in
+          </Link>
+        </div>
+      </nav>
+
+      {/* ── 2. Background Glowing Eclipse Effect ── */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
+        {/* Layer 1: Extreme blur deep blue volumetric background halo */}
+        <div className="absolute w-[55rem] h-[55rem] rounded-full bg-blue-900/35 blur-[140px] pointer-events-none" />
+
+        {/* Layer 2: Electric cyan / royal blue core inner glow */}
+        <div className="absolute w-[38rem] h-[38rem] rounded-full bg-cyan-500/15 blur-[95px] pointer-events-none" />
+        <div className="absolute w-[24rem] h-[24rem] rounded-full bg-blue-600/25 blur-[65px] pointer-events-none" />
+
+        {/* Layer 3: Central Celestial Eclipse Disc with Asymmetrical Glowing Ring */}
+        <div className="relative w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] md:w-[600px] md:h-[600px] lg:w-[680px] lg:h-[680px] flex items-center justify-center">
+          {/* Asymmetrical Glowing SVG Crescent Arc with Multi-Tier Filters */}
+          <svg
+            className="absolute inset-0 w-full h-full -rotate-12 scale-105"
+            viewBox="0 0 500 500"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              {/* Luminous Crescent Gradient: Pure white apex -> Electric Cyan -> Deep Cobalt -> Transparent */}
+              <linearGradient id="eclipseGlowGradient" x1="10%" y1="0%" x2="90%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+                <stop offset="22%" stopColor="#bae6fd" stopOpacity="0.95" />
+                <stop offset="48%" stopColor="#38bdf8" stopOpacity="0.75" />
+                <stop offset="72%" stopColor="#1d4ed8" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#050515" stopOpacity="0" />
+              </linearGradient>
+
+              {/* Multi-tier Glow Filter */}
+              <filter id="crescentBloomFilter" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="sharpGlow" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="midGlow" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="28" result="wideGlow" />
+                <feMerge>
+                  <feMergeNode in="wideGlow" />
+                  <feMergeNode in="midGlow" />
+                  <feMergeNode in="sharpGlow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* Diffuse Outer Ambient Corona */}
+            <circle
+              cx="250"
+              cy="250"
+              r="230"
+              stroke="url(#eclipseGlowGradient)"
+              strokeWidth="4"
+              strokeDasharray="940 500"
+              strokeDashoffset="180"
+              opacity="0.5"
+              filter="blur(18px)"
+            />
+
+            {/* Mid-Core Glowing Crescent */}
+            <circle
+              cx="250"
+              cy="250"
+              r="228"
+              stroke="url(#eclipseGlowGradient)"
+              strokeWidth="5"
+              strokeDasharray="800 650"
+              strokeDashoffset="210"
+              filter="url(#crescentBloomFilter)"
+            />
+
+            {/* Razor-Sharp White/Blue Crescent Edge */}
+            <circle
+              cx="250"
+              cy="250"
+              r="226"
+              stroke="#ffffff"
+              strokeWidth="2.5"
+              strokeDasharray="440 1000"
+              strokeDashoffset="240"
+              opacity="0.98"
+              style={{
+                filter: 'drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 18px #38bdf8)',
+              }}
+            />
+          </svg>
+
+          {/* Eclipsing Dark Disc blending into the midnight blue/black background */}
+          <div className="w-[94%] h-[94%] rounded-full bg-[#050515] shadow-[inset_0_0_60px_rgba(10,25,50,0.85)] relative z-0" />
+        </div>
+      </div>
+
+      {/* ── 3D Photorealistic Planet Element (Behind typography at z-index: -1) ── */}
       <HeroCanvas />
 
-      {/* ── 3. Subtle Cyber Background Radial Ambient Lighting ── */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_40%,_#070a0f_95%)] z-0" />
-      <div className="absolute -bottom-36 right-1/4 w-[45rem] h-[45rem] rounded-full bg-[#101622]/40 blur-[160px] pointer-events-none z-0" />
-      <div className="absolute top-1/4 left-1/4 w-[35rem] h-[35rem] rounded-full bg-[#162032]/25 blur-[140px] pointer-events-none z-0" />
-
-      {/* ── 4. Foreground Monolith Typography & Bottom Elements ── */}
-      <div
-        ref={heroContentRef}
-        className="relative z-20 w-full h-full flex flex-col justify-between items-center pt-28 pb-16 px-4 pointer-events-none"
-      >
-        {/* Massive, Widely Letter-Spaced, Ultra-Bold (font-black) MARIS Typography */}
-        <div className="flex-1 flex items-center justify-center w-full">
-          <h1
-            ref={titleRef}
-            className="text-6xl sm:text-8xl md:text-9xl lg:text-[14rem] font-black tracking-[0.35em] sm:tracking-[0.45em] text-[#e2e8e4] uppercase text-center pl-[0.35em] sm:pl-[0.45em] select-none opacity-95 transition-transform drop-shadow-[0_15px_40px_rgba(0,0,0,0.9)]"
+      {/* ── 3. Main Hero Typography: MARIS spaced extremely far across full width ── */}
+      <div className="relative z-20 w-full flex justify-between items-center px-8 sm:px-14 md:px-20 lg:px-24 select-none pointer-events-none">
+        {['M', 'A', 'R', 'I', 'S'].map((char) => (
+          <span
+            key={char}
+            className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[13.5rem] font-black text-white uppercase tracking-tighter leading-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)]"
             style={{
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
           >
-            MARIS
-          </h1>
-        </div>
+            {char}
+          </span>
+        ))}
+      </div>
 
-        {/* Bottom Hero Elements */}
-        <div
-          ref={ctaBlockRef}
-          className="flex flex-col items-center text-center gap-3 pointer-events-auto max-w-md w-full"
+      {/* ── 4. Bottom Hero Content ── */}
+      <div className="absolute bottom-12 w-full flex flex-col items-center justify-center gap-6 z-20 pointer-events-auto">
+        {/* Subheading: 'THAT SIMPLY WORKS' (white, medium tracking, uppercase) */}
+        <p className="font-mono text-xs sm:text-sm font-semibold tracking-[0.25em] text-white uppercase select-none">
+          THAT SIMPLY WORKS
+        </p>
+
+        {/* CTA Button: Fully rounded pill shape (rounded-full), solid white background, black text reading 'Launch Demo Mode', with ample horizontal padding */}
+        <button
+          type="button"
+          onClick={() => router.push('/console')}
+          className="px-9 py-3.5 sm:px-11 sm:py-4 rounded-full bg-white text-black font-semibold text-sm sm:text-base tracking-wide hover:bg-neutral-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.55)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
         >
-          {/* Subtitle */}
-          <p className="font-mono-inst text-xs sm:text-sm font-bold tracking-[0.3em] text-[#e2e8e4] uppercase">
-            THAT SIMPLY WORKS
-          </p>
+          Launch Demo Mode
+        </button>
 
-          {/* Microcopy with Green Status Dot */}
-          <div className="flex items-center gap-2 font-mono-inst text-[11px] text-[#8c978f] tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#5b937c]" />
-            <span>Enterprise Grade Security</span>
-          </div>
-
-          {/* ── 3D Animated Scroll Down Indicator ── */}
-          <button
-            type="button"
-            onClick={() => {
-              window.scrollTo({
-                top: window.innerHeight * 1.1,
-                behavior: 'smooth',
-              });
-            }}
-            className="group mt-3 flex flex-col items-center gap-2 cursor-pointer transition-transform hover:translate-y-0.5"
-            aria-label="Scroll down to explore"
-          >
-            {/* 3D Cyber Mouse / Track Capsule */}
-            <div className="relative h-9 w-5 rounded-full border border-white/20 bg-[#0b1018]/80 p-1 shadow-[0_0_12px_rgba(59,123,153,0.25)] backdrop-blur-sm group-hover:border-white/40">
-              {/* Traveling Glowing Light Pip */}
-              <div className="h-2 w-2 rounded-full bg-[#3b7b99] shadow-[0_0_8px_#3b7b99] animate-[bounce_1.8s_infinite] mx-auto" />
-            </div>
-
-            {/* Pulsing Text & Downward Indicator */}
-            <div className="flex items-center gap-1 font-mono-inst text-[9px] uppercase tracking-[0.25em] text-[#8c978f] group-hover:text-[#e2e8e4] transition-colors">
-              <span>SCROLL DOWN</span>
-              <span className="animate-pulse">↓</span>
-            </div>
-          </button>
-        </div>
+        {/* Footer Text: 'Enterprise Grade Security' positioned directly below CTA (small, muted gray text) */}
+        <span className="text-[11px] sm:text-xs font-mono text-[#8c978f] tracking-wider select-none">
+          Enterprise Grade Security
+        </span>
       </div>
     </section>
   );

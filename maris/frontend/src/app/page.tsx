@@ -45,8 +45,8 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#070a0f] text-[#e2e8e4] selection:bg-[#3b7b99] selection:text-white">
-      {/* ── 1. Scroll-Driven 3D Solid Matte Dark Sphere Hero Entrance with 3D Scroll Down Indicator ── */}
+    <main className="min-h-screen bg-[#050515] text-[#e2e8e4] selection:bg-[#3b7b99] selection:text-white overflow-hidden">
+      {/* ── 1. Hero Section matching reference aesthetic ── */}
       <Hero />
 
       {/* ── 2. Real-Time Hydrographic Intelligence & Sensor Telemetry Bench ── */}
